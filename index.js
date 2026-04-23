@@ -12,7 +12,7 @@ function createBot() {
         host: 'potetosmp11.aternos.me',
         port: 58682,
         username: 'POTETO24',
-        version: '1.21.1',
+        version: '1.21.11',
         checkTimeoutInterval: 60000 // Zaman aşımı süresini artırır
     })
 
