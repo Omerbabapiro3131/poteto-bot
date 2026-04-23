@@ -1,9 +1,10 @@
 const mineflayer = require('mineflayer')
 const http = require('http')
 
-// Replit'in projeyi kapatmaması için şart
+// Replit'in botu "bozuk" sanıp resetlemesini engellemek için sahte server
 http.createServer((req, res) => {
-    res.end("POTETO24 Arka Planda Aktif");
+    res.writeHead(200);
+    res.end("POTETO24_ONLINE");
 }).listen(process.env.PORT || 3000);
 
 function createBot() {
@@ -12,18 +13,23 @@ function createBot() {
         port: 58682,
         username: 'POTETO24',
         version: '1.21.1',
-        // Sunucuyla olan bağlantı kontrolünü gevşetelim ki durduk yere atmasın
-        checkTimeoutInterval: 120000 
+        // Sunucu lag yaparsa hemen düşmemesi için limitleri kökle
+        connectTimeout: 120000,
+        checkTimeoutInterval: 120000
     })
 
-    bot.on('login', () => console.log('POTETO24 sessizce girdi.'))
+    bot.on('login', () => console.log('POTETO24 içeri daldı ve sabitlendi.'));
 
-    bot.on('end', (reason) => {
-        console.log('Bağlantı koptu, 10 saniye sonra tekrar deniyor...');
-        setTimeout(createBot, 10000)
-    })
+    bot.on('end', () => {
+        // Atıldığı an (0 saniye bekleme) geri girmeye çalışır
+        createBot();
+    });
 
-    bot.on('error', (err) => console.log('Hata oluştu:', err))
+    // Hata verse bile kodu durdurma, devam et
+    bot.on('error', (err) => {
+        console.log('Bağlantı hatası, tekrar deneniyor...');
+        setTimeout(createBot, 1000);
+    });
 }
 
 createBot()
