@@ -1,10 +1,9 @@
 const mineflayer = require('mineflayer')
 const http = require('http')
 
-// 7/24 aktif kalması için küçük bir server
+// Portu dinle ama botu etkileme
 http.createServer((req, res) => {
-    res.write("POTETO24 - 1.21.11 Aktif!");
-    res.end();
+    res.end("POTETO24 CALISIYOR");
 }).listen(process.env.PORT || 3000);
 
 function createBot() {
@@ -12,22 +11,26 @@ function createBot() {
         host: 'potetosmp11.aternos.me',
         port: 58682,
         username: 'POTETO24',
-        version: '1.21.1' // 1.21.11 sunucular için bu sürümü kullanmalısın
+        version: '1.21.1',
+        connectTimeout: 60000, // Bağlanma süresini uzat
+        checkTimeoutInterval: 90000 // Sunucu yanıt vermezse hemen çıkma
     })
 
-    bot.on('login', () => console.log('POTETO24 (1.21.11) içeri daldı!'))
+    bot.on('login', () => console.log('POTETO24 içeri daldı!'))
     
     bot.on('spawn', () => {
-        // AFK kalıp atılmaması için 30 saniyede bir zıplama
+        console.log('Bot doğdu, zıplama aktif.');
+        // Çok sık zıplamasın, 1 dakikada bir yeterli
         setInterval(() => {
             bot.setControlState('jump', true)
             setTimeout(() => bot.setControlState('jump', false), 500)
-        }, 30000)
+        }, 60000)
     })
 
-    bot.on('end', () => {
-        console.log('Bağlantı koptu, 5 saniye sonra tekrar deniyor...');
-        setTimeout(createBot, 5000)
+    bot.on('end', (reason) => {
+        console.log('Bağlantı koptu, sebep:', reason);
+        // Hemen girmeye çalışmasın, 10 saniye bekle
+        setTimeout(createBot, 10000)
     })
 
     bot.on('error', (err) => console.log('Hata:', err))
